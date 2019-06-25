@@ -1,0 +1,14 @@
+C:\Users\Argo\Desktop\Dunga\PizzaShop\PizzaShop\obj\Debug\PizzaShop.csprojAssemblyReference.cache
+C:\Users\Argo\Desktop\Dunga\PizzaShop\PizzaShop\obj\Debug\PizzaShop.csproj.CoreCompileInputs.cache
+C:\Users\Argo\Desktop\Dunga\PizzaShop\PizzaShop\bin\Debug\PizzaShop.exe.config
+C:\Users\Argo\Desktop\Dunga\PizzaShop\PizzaShop\bin\Debug\PizzaShop.exe
+C:\Users\Argo\Desktop\Dunga\PizzaShop\PizzaShop\bin\Debug\PizzaShop.pdb
+C:\Users\Argo\Desktop\Dunga\PizzaShop\PizzaShop\obj\Debug\PizzaShop.exe
+C:\Users\Argo\Desktop\Dunga\PizzaShop\PizzaShop\obj\Debug\PizzaShop.pdb
+C:\Users\Argo\Desktop\At-Bay-Kolio-s-Pizza\PizzaShop\PizzaShop\bin\Debug\PizzaShop.exe.config
+C:\Users\Argo\Desktop\At-Bay-Kolio-s-Pizza\PizzaShop\PizzaShop\bin\Debug\PizzaShop.exe
+C:\Users\Argo\Desktop\At-Bay-Kolio-s-Pizza\PizzaShop\PizzaShop\bin\Debug\PizzaShop.pdb
+C:\Users\Argo\Desktop\At-Bay-Kolio-s-Pizza\PizzaShop\PizzaShop\obj\Debug\PizzaShop.csprojAssemblyReference.cache
+C:\Users\Argo\Desktop\At-Bay-Kolio-s-Pizza\PizzaShop\PizzaShop\obj\Debug\PizzaShop.csproj.CoreCompileInputs.cache
+C:\Users\Argo\Desktop\At-Bay-Kolio-s-Pizza\PizzaShop\PizzaShop\obj\Debug\PizzaShop.exe
+C:\Users\Argo\Desktop\At-Bay-Kolio-s-Pizza\PizzaShop\PizzaShop\obj\Debug\PizzaShop.pdb
