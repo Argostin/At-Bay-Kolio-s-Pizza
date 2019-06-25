@@ -8,6 +8,9 @@ namespace PizzaShop
 {
     class Program
     {
+        /// <summary>
+        /// //////////////////////////////   INPUT HELPER
+        /// </summary>
         static class Inputs
         {
             public static int Int(string S, bool c)
@@ -44,6 +47,9 @@ namespace PizzaShop
 
         }
 
+        /// <summary>
+        /// /////////////////////////////////        MENUS
+        /// </summary>
         static class Menu
         {
             public static void LoginMenu(ItemList[] itemLists)
@@ -70,17 +76,25 @@ namespace PizzaShop
                 while (Z != 0)
                 {
                     Console.WriteLine("1. Списъци с продукти.");
-                    Console.WriteLine("2. Бюджет.");
+                    Console.WriteLine("2. Налични пари.");
+                    Console.WriteLine("3. Сделки.");
+                    Console.WriteLine("4. Продукти на свършване.");
+                    Console.WriteLine("5. Добави пари.");
                     Console.WriteLine("0. Назад");
                     Z = Inputs.Int("Въведи цяло число: ", true);
                     switch (Z)
                     {
                         case 1: ProductTypes(itemLists); break;
-                        //case 2:
+                        case 2: Bujet.Display(); break;
+                            //case 3:..........
+                        case 4: for(int i = 0; i < 4; i++)itemLists[i].CheckCount();  break;
+                        case 5: Bujet.AddToMoney(Inputs.Double("Количество пари: ", true)); break;
                         case 0: return;
                     }
                 }
             }
+
+            
 
             private static void ProductTypes(ItemList[] itemLists)
             {
@@ -106,6 +120,10 @@ namespace PizzaShop
                 }
             }
         }
+
+        /// <summary>
+        /// //////////////////////////////////     PRODUCTS
+        /// </summary>
 
         class Item
         {
@@ -171,8 +189,9 @@ namespace PizzaShop
 
             public void Buy()
             {
-                count += Inputs.Int("Брой: ", true);
-                //money-
+                int Z = Inputs.Int("Брой: ", true);
+                if (Bujet.TakeFromMoney(Z * buyPrice)) count += Z;
+                else Console.WriteLine("Няма достатъчно пари за покупката.");
             }
 
             public void Sell()
@@ -181,9 +200,16 @@ namespace PizzaShop
                 //money--
             }
 
+            public int GetCount()
+            {
+                return count;
+            }
+
 
         }
-
+        /// <summary>
+        /// ////////////////////////                 LISTS OF PRODUCTS
+        /// </summary>
         class ItemList
         {
             List<Item> items = new List<Item>();
@@ -249,13 +275,53 @@ namespace PizzaShop
                     }
                 }
             }
-        }
 
+            public void CheckCount()
+            {
+                for(int i = 0; i < lenght; i++)
+                {
+                    if(items[i].GetCount()<=5) items[i].Display();
+                }
+            }
+        }
+        /// <summary>
+        /// /////////////////////////                  MONEY MANAGER
+        /// </summary>
         static class Bujet
         {
             private static double money;
-        }
 
+            public static void AddToMoney(double X)
+            {
+                money += X;
+            }
+
+            public static bool TakeFromMoney(double X)
+            {
+                if (money > X) { money -= X; return true; }
+                else return false;
+            }
+
+            public static void SetMoney(double X)
+            {
+                money = X;
+            }
+
+            public static double GetMoney()
+            {
+                return money;
+            }
+
+            public static void Display()
+            {
+                Console.WriteLine("Пари: {0}лв.", money);
+            }
+
+
+        }
+        /// <summary>
+        /// ////////////////////             MAIN
+        /// </summary>
         static void Main(string[] args)
         {
             ItemList[] itemLists = new ItemList[4];
