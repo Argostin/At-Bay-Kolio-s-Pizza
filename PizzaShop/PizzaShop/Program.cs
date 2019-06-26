@@ -234,7 +234,6 @@ namespace PizzaShop
                 }
                 else Console.WriteLine("Няма достатъчно пари за покупката.");
             }
-
             public void Sell(List<Order> orderList)
             {
                 int Z = Inputs.Int("Брой: ",0,30000);
@@ -244,6 +243,8 @@ namespace PizzaShop
                     count -= Z;
                     Order order = new Order(DateTime.Now, name, sellPrice, Z, "Продажба", Z * sellPrice);
                     orderList.Add(order);
+                    if (count < 6) Console.WriteLine("Продукта е на свършване!");
+                    Console.ReadKey();
                 }
                 else Console.WriteLine("Няма достатъчно продукти за сделката.");
             }
@@ -256,6 +257,8 @@ namespace PizzaShop
                     count -= Z;
                     Order order = new Order(DateTime.Now, name, -buyPrice, Z, "Фира", Z * -buyPrice);
                     orderList.Add(order);
+                    if (count < 6) Console.WriteLine("Продукта е на свършване!");
+                    Console.ReadKey();
                 }
                 else Console.WriteLine("Грешно въведени продукти.");
             }
