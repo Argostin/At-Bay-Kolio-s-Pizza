@@ -19,3 +19,6 @@ C:\Users\Argo\Desktop\repos\At-Bay-Kolio-s-Pizza\PizzaShop\PizzaShop\obj\Debug\P
 C:\Users\Argo\Desktop\repos\At-Bay-Kolio-s-Pizza\PizzaShop\PizzaShop\obj\Debug\PizzaShop.csproj.CoreCompileInputs.cache
 C:\Users\Argo\Desktop\repos\At-Bay-Kolio-s-Pizza\PizzaShop\PizzaShop\obj\Debug\PizzaShop.exe
 C:\Users\Argo\Desktop\repos\At-Bay-Kolio-s-Pizza\PizzaShop\PizzaShop\obj\Debug\PizzaShop.pdb
+C:\Users\Argo\Desktop\repos\At-Bay-Kolio-s-Pizza\PizzaShop\PizzaShop\bin\Debug\System.Data.SQLite.dll
+C:\Users\Argo\Desktop\repos\At-Bay-Kolio-s-Pizza\PizzaShop\PizzaShop\bin\Debug\System.Data.SQLite.xml
+C:\Users\Argo\Desktop\repos\At-Bay-Kolio-s-Pizza\PizzaShop\PizzaShop\obj\Debug\PizzaShop.csproj.CopyComplete

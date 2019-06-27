@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using System.Data.SQLite;
+using System.IO;
 namespace PizzaShop
 {
     class Program
@@ -126,6 +127,7 @@ namespace PizzaShop
                     Console.WriteLine("3. Сделки.");
                     Console.WriteLine("4. Продукти на свършване.");
                     Console.WriteLine("5. Добави пари.");
+                    Console.WriteLine("6. Създай нова база от данни.");
                     Console.WriteLine("0. Назад");
                     Z = Inputs.Int("Въведи цяло число: ",0,6);
                     switch (Z)
@@ -135,6 +137,7 @@ namespace PizzaShop
                         case 3: Order.DisplayList(orderList); break;
                         case 4: for(int i = 0; i < 4; i++)itemLists[i].CheckCount();  break;
                         case 5: Bujet.AddToMoney(Inputs.Double("Количество пари: ")); break;
+                        case 6: DataBase.Create(); break;
                         case 0: return;
                     }
                 }
@@ -177,14 +180,25 @@ namespace PizzaShop
             private string name, description;
             private int count;
 
-            public Item()
+            public Item(string a = "", double b=0, double c=0, int d=0, string e="")
             {
+                name = a;
+                buyPrice = b;
+                sellPrice = c;
+                count = d;
+                description = e;
                 
-                name = Inputs.String("Име на продукта:");
-                buyPrice = Inputs.Double("Цена на изкупуване: ");
-                sellPrice = Inputs.Double("Цена на продаване: ");
-                count = Inputs.Int("Брой: ",0,30000);
-                description = Inputs.String("Описание на продукта: ");
+            }
+
+            public void UpdateDB(string nameOfList)
+            {
+                SQLiteConnection dbConn = new SQLiteConnection("Data Source=PizzaDataBase.sqlite;Version=3;");
+                dbConn.Open();
+                string sql = "insert into " + nameOfList + " (name,buyprice,sellprice,count,description) values ('" + name + "','" + buyPrice + "','" + sellPrice + "','" + count + "','" + description + "');";
+                SQLiteCommand command = new SQLiteCommand(sql, dbConn);
+                command.ExecuteNonQuery();
+                dbConn.Close();
+
             }
 
             public void GetValues(out string a, out double b, out double c, out int d, out string e)
@@ -229,7 +243,7 @@ namespace PizzaShop
                 if (Bujet.TakeFromMoney(Z * buyPrice))
                 {
                     count += Z;
-                    Order order = new Order(DateTime.Now,name,buyPrice,Z,"Покупка",Z*buyPrice);
+                    Order order = new Order(DateTime.Now.ToString(), name,buyPrice,Z,"Покупка",Z*buyPrice,true);
                     orderList.Add(order);
                 }
                 else Console.WriteLine("Няма достатъчно пари за покупката.");
@@ -241,11 +255,11 @@ namespace PizzaShop
                 {
                     Bujet.AddToMoney(Z * sellPrice);
                     count -= Z;
-                    Order order = new Order(DateTime.Now, name, sellPrice, Z, "Продажба", Z * sellPrice);
+                    Order order = new Order(DateTime.Now.ToString(), name, sellPrice, Z, "Продажба", Z * sellPrice,true);
                     orderList.Add(order);
-                    if (count < 6) Console.WriteLine("Продукта е на свършване!");
-                    Console.ReadKey();
-                }
+                    if (count < 6) { Console.WriteLine("Продукта е на свършване!"); Console.ReadKey(); }
+
+                    }
                 else Console.WriteLine("Няма достатъчно продукти за сделката.");
             }
 
@@ -255,11 +269,11 @@ namespace PizzaShop
                 if (Z <= count)
                 {
                     count -= Z;
-                    Order order = new Order(DateTime.Now, name, -buyPrice, Z, "Фира", Z * -buyPrice);
+                    Order order = new Order(DateTime.Now.ToString(), name, -buyPrice, Z, "Фира", Z * -buyPrice,true);
                     orderList.Add(order);
-                    if (count < 6) Console.WriteLine("Продукта е на свършване!");
-                    Console.ReadKey();
-                }
+                    if (count < 6) { Console.WriteLine("Продукта е на свършване!"); Console.ReadKey(); }
+
+                    }
                 else Console.WriteLine("Грешно въведени продукти.");
             }
 
@@ -275,11 +289,34 @@ namespace PizzaShop
         /// </summary>
         class ItemList
         {
+            private string nameOfList;
+
             List<Item> items = new List<Item>();
             private int lenght = 0;
-            private void AddItem()
+
+            public ItemList(string n)
             {
-                items.Add(new Item());
+                nameOfList = n;
+            }
+
+            public void AddItem(Item item, bool T)
+            {
+                string name;
+                double buyPrice;
+                double sellPrice;
+                int count;
+                string description;
+                if (T)
+                {
+                    name = Inputs.String("Име на продукта:");
+                    buyPrice = Inputs.Double("Цена на изкупуване: ");
+                    sellPrice = Inputs.Double("Цена на продаване: ");
+                    count = Inputs.Int("Брой: ", 0, 30000);
+                    description = Inputs.String("Описание на продукта: ");
+                    item = new Item(name, buyPrice, sellPrice, count, description);
+                }
+
+                items.Add(item);
                 lenght++;
             }
 
@@ -287,11 +324,13 @@ namespace PizzaShop
             {
                 items.RemoveAt(Z);
                 lenght--;
+                UpdateList();
             }
 
             private void ChangeItem(int Z)
             {
                 items[Z].Change();
+                UpdateList();
             }
 
             private void DisplayList()
@@ -307,11 +346,7 @@ namespace PizzaShop
             private void BuyProduct(int Z,List<Order> orderList)
             {
                 items[Z].Buy(orderList);
-            }
-
-            private void SellProduct(int Z,List<Order> orderList)
-            {
-                items[Z].Sell(orderList);
+                UpdateList();
             }
 
             public void Menu(List<Order> orderList)
@@ -330,7 +365,7 @@ namespace PizzaShop
                     switch (Z)
                     {
                         case 1: DisplayList(); break;
-                        case 2: AddItem(); break;
+                        case 2: AddItem(new Item(),true); break;
                         case 3: ChangeItem(Inputs.Int("ID на продукта: ",0,lenght)); break;
                         case 4: RemoveItem(Inputs.Int("ID на продукта: ", 0, lenght)); break;
                         case 5: BuyProduct(Inputs.Int("ID на продукта: ", 0, lenght), orderList); break;
@@ -350,7 +385,7 @@ namespace PizzaShop
 
                 if (type == 1) items[ID].Sell(orderList);
                 if (type == 2) items[ID].Fira(orderList);
-
+                UpdateList();
             }
             
 
@@ -361,6 +396,25 @@ namespace PizzaShop
                     if(items[i].GetCount()<=5) items[i].Display();
                 }
             }
+
+            public void UpdateList()
+            {
+                SQLiteConnection dbConn = new SQLiteConnection("Data Source=PizzaDataBase.sqlite;Version=3;");
+                dbConn.Open();
+                string sql = "DELETE FROM " + nameOfList;
+                SQLiteCommand command = new SQLiteCommand(sql, dbConn);
+                command.ExecuteNonQuery();
+                dbConn.Close();
+
+
+                for (int i = 0; i < lenght; i++)
+                {
+                    items[i].UpdateDB(nameOfList);
+                }
+
+                
+
+            }
         }
         /// <summary>
         /// /////////////////////////                  MONEY MANAGER
@@ -369,20 +423,50 @@ namespace PizzaShop
         {
             private static double money;
 
+            public static void Load()
+            {
+                SQLiteConnection dbConn = new SQLiteConnection("Data Source=PizzaDataBase.sqlite;Version=3;");
+                dbConn.Open();
+                string sql = "select * from Money";
+                SQLiteCommand command = new SQLiteCommand(sql, dbConn);
+                SQLiteDataReader reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    money = double.Parse(reader["Money"].ToString());
+                }
+                dbConn.Close();
+            }
+
+            public static void Update()
+            {
+                SQLiteConnection dbConn = new SQLiteConnection("Data Source=PizzaDataBase.sqlite;Version=3;");
+                dbConn.Open();
+                string sql = "delete from Money";
+                SQLiteCommand command = new SQLiteCommand(sql, dbConn);
+                command.ExecuteNonQuery();
+
+                sql = "INSERT INTO Money (Money) values ('" + money + "');";
+                command = new SQLiteCommand(sql, dbConn);
+                command.ExecuteNonQuery();
+                dbConn.Close();
+            }
+
             public static void AddToMoney(double X)
             {
                 money += X;
+                Update();
             }
 
             public static bool TakeFromMoney(double X)
             {
-                if (money > X) { money -= X; return true; }
+                if (money > X) { money -= X; Update(); return true; }
                 else return false;
             }
 
             public static void SetMoney(double X)
             {
                 money = X;
+                Update();
             }
 
             public static double GetMoney()
@@ -403,13 +487,13 @@ namespace PizzaShop
 
         class Order
         {
-            DateTime date;
+            string date;
             string name, type;
             double price, value;
             int count;
             static int lenght=0;
 
-            public Order(DateTime a, string b, double c, int d, string e, double f)
+            public Order(string a, string b, double c, int d, string e, double f,bool j)
             {
                 date = a;
                 name = b;
@@ -418,9 +502,12 @@ namespace PizzaShop
                 type = e;
                 value = f;
                 lenght++;
+                if(j) DataBase.AddOrder(a,b,c,d,e,f);
             }
 
-            public DateTime GetDate()
+
+
+            public string GetDate()
             {
                 return date;
             }
@@ -463,22 +550,133 @@ namespace PizzaShop
                 }
             }
         }
+        /// <summary>
+        /// //////////////////////            DATA BASE
+        /// </summary>
+        static class DataBase
+        {
+            public static void Create()
+            {
+                SQLiteConnection.CreateFile("PizzaDataBase.sqlite");
+
+                SQLiteConnection dbConn = new SQLiteConnection("Data Source=PizzaDataBase.sqlite;Version=3;");
+                dbConn.Open();
+
+                string sql;
+                //orders
+                sql = "create table Orders (";
+                sql += " 'ID' INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,";
+                sql += " 'date' TEXT NOT NULL,";
+                sql += " 'name'  TEXT NOT NULL,";
+                sql += " 'price' NUMERIC NOT NULL,";
+                sql += " 'count' INTEGER NOT NULL,";
+                sql += " 'type' TEXT NOT NULL,";
+                sql += " 'value' NUMERIC NOT NULL);";
+                SQLiteCommand command = new SQLiteCommand(sql, dbConn);
+                command.ExecuteNonQuery();
+                //products
+
+                string[] table = { "Pizzas", "Desserts", "Drinks", "Additions" };
+                for(int i = 0; i < 4; i++)
+                {
+                    sql = "CREATE TABLE " + table[i] + " (";
+                    sql += " 'ID'    INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,";
+                    sql += " 'name'  TEXT NOT NULL,";
+                    sql += " 'buyprice' NUMERIC NOT NULL,";
+                    sql += " 'sellprice' NUMERIC NOT NULL,";
+                    sql += " 'count' INTEGER NOT NULL,";
+                    sql += " 'description' TEXT NOT NULL);";
+                    command = new SQLiteCommand(sql, dbConn);
+                    command.ExecuteNonQuery();
+                }
+
+                sql = "CREATE TABLE 'Money' ('Money' NUMERIC NOT NULL);";
+                command = new SQLiteCommand(sql, dbConn);
+                command.ExecuteNonQuery();
+
+                dbConn.Close();
+            }
+
+            public static void AddOrder(string date, string name, double price, int count, string type, double value)
+            {
+
+                SQLiteConnection dbConn = new SQLiteConnection("Data Source=PizzaDataBase.sqlite;Version=3;");
+                dbConn.Open();
+
+                string sql = "INSERT INTO Orders (date,name,price,count,type,value) values ('" + name + "','" + date + "','" + price + "','" + count + "','" + type + "','" + value + "');";
+                SQLiteCommand command = new SQLiteCommand(sql, dbConn);
+                command.ExecuteNonQuery();
+
+                dbConn.Close();
+            }
+
+            public static List<Order> LoadOrders()
+            {
+                List<Order> list = new List<Order>();
+                SQLiteConnection dbConn = new SQLiteConnection("Data Source=PizzaDataBase.sqlite;Version=3;");
+                dbConn.Open();
+
+                string sql = "select * from Orders";
+                SQLiteCommand command = new SQLiteCommand(sql, dbConn);
+                SQLiteDataReader reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    string date = reader["date"].ToString();
+                    string name = reader["name"].ToString();
+                    string type = reader["type"].ToString();
+                    double price = double.Parse(reader["price"].ToString());
+                    double value = double.Parse(reader["value"].ToString());
+                    int count = int.Parse(reader["count"].ToString());
+                    Order O = new Order(date, name, price, count, type, value, false);
+                    list.Add(O);
+                    
+                }
+                dbConn.Close();
+                return list;
+            }
+
+            public static ItemList LoadItemList(string nameOfList)
+            {
+                ItemList list = new ItemList(nameOfList);
+
+                SQLiteConnection dbConn = new SQLiteConnection("Data Source=PizzaDataBase.sqlite;Version=3;");
+                dbConn.Open();
+
+                string sql = "select *  from " + nameOfList;
+                SQLiteCommand command = new SQLiteCommand(sql, dbConn);
+                SQLiteDataReader reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    string name = reader["name"].ToString();
+                    string desctiption = reader["description"].ToString();
+                    double buyprice = double.Parse(reader["buyprice"].ToString());
+                    double sellprice = double.Parse(reader["sellprice"].ToString());
+                    int count = int.Parse(reader["count"].ToString());
+
+                    Item O = new Item(name, buyprice, sellprice, count, desctiption);
+                    list.AddItem(O,false);
+
+                }
+                dbConn.Close();
+                return list;
+            }
+            //DELETE FROM table_name
+        }
+
 
         /// <summary>
         /// ////////////////////             MAIN
         /// </summary>
         static void Main(string[] args)
         {
-            List<Order> orderList = new List<Order>();
-
+            if (!File.Exists("PizzaDataBase.sqlite")) DataBase.Create();
+            List<Order> orderList = DataBase.LoadOrders();
             ItemList[] itemLists = new ItemList[4];
-
-            itemLists[0] = new ItemList();//pizza
-            itemLists[1] = new ItemList();//dessert
-            itemLists[2] = new ItemList();//drink
-            itemLists[3] = new ItemList();//dobavki
-
-			//test
+            itemLists[0] = DataBase.LoadItemList("Pizzas");//pizza
+            itemLists[1] = DataBase.LoadItemList("Desserts");//dessert
+            itemLists[2] = DataBase.LoadItemList("Drinks");//drink
+            itemLists[3] = DataBase.LoadItemList("Additions");//dobavki
+            Bujet.Load();
 
             Menu.LoginMenu(itemLists,orderList);
         }
